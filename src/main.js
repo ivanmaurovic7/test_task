@@ -1,16 +1,15 @@
 import Vue from 'vue'
-import App from './App'
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCheck, faEdit, faTimes, faTrash } from '@fortawesome/free-solid-svg-icons'
+import { faAngleUp, faEye, faComment } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import vSelect from 'vue-select'
+import 'vue-select/dist/vue-select.css'
+import App from './App'
 
-library.add(faEdit)
-library.add(faTrash)
-library.add(faCheck)
-library.add(faCheck)
-library.add(faTimes)
+library.add(faAngleUp, faEye, faComment)
 
 Vue.component('fa', FontAwesomeIcon)
+Vue.component('v-select', vSelect)
 
 Vue.config.productionTip = false
 

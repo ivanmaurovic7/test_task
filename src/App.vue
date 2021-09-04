@@ -1,61 +1,105 @@
 <template>
   <div id="app">
-    <ClientsTable @show-modal="showModal = $event" :clients="clients" @set-clients="clients = $event"/>
-    <ClientModal v-if="showModal" :showModal="showModal" @show-modal="showModal = $event" :clients="clients" @set-clients="clients = $event"/>
+    <ContainerWithTitle title="Feedback Board" />
+    <FeedbackBoard 
+      :feedbackItems="feedbackItems"
+      :sortSelectedOption="sortSelectedOption"
+      @set-sort-option="sortSelectedOption = $event"
+      @upvote="upvoteFeedbackItem($event)" />
   </div>
 </template>
 
 <script>
-import fetchUtil from "@/utils/fetchUtil"
+import ContainerWithTitle from "@/components/ContainerWithTitle"
+import FeedbackBoard from "@/components/FeedbackBoard"
+import { MOST_UPVOTES, MOST_COMMENTS } from "@/constants/sortOptions"
+const LOCAL_STORAGE_KEY = 'task-z_local_data';
 
-import ClientsTable from "@/components/ClientsTable"
-import ClientModal from "@/components/ClientModal"
 export default {
   components: {
-    ClientsTable,
-    ClientModal,
+    ContainerWithTitle,
+    FeedbackBoard,
+  },
+  mounted() {
+    const savedData = localStorage.getItem(LOCAL_STORAGE_KEY)
+    if (savedData) {
+      const { sortSelectedOption, feedbackItems } = JSON.parse(savedData);
+      this.sortSelectedOption = sortSelectedOption
+      this.feedbackItems = feedbackItems; 
+    }
+    this.sortFeedbackItems()
   },
   data() {
     return {
-      clients: [],
-      showModal: false
+      sortSelectedOption: MOST_UPVOTES,
+      feedbackItems: [
+        {
+          title: 'Add tags for solutions',
+          description: 'Easier to search for solutions based on a specific stack.',
+          upvotes: 112,
+          comments: 2,
+        },
+        {
+          title: 'Add a dark theme option',
+          description: 'It would help people with light sensitivities and who prefer dark mode.',
+          upvotes: 99,
+          comments: 4,
+        },
+        {
+          title: 'Q&A within the challenge hubs',
+          description: 'Challenge specific Q&A would make for easy reference.',
+          upvotes: 65,
+          comments: 1,
+        },
+      ],
     }
   },
-  async mounted() {
-    const clients = await fetchUtil('http://localhost:3000/client/')
-    this.clients = await clients.json()
+  methods: {
+    upvoteFeedbackItem(feedbackIndex) {
+      this.feedbackItems[feedbackIndex].upvotes++
+    },
+    sortFeedbackItems() {
+      const value = this.sortSelectedOption
+      if (value === MOST_UPVOTES) {
+        this.feedbackItems.sort((a, b) => b.upvotes - a.upvotes)
+      } else if (value === MOST_COMMENTS) {
+        this.feedbackItems.sort((a, b) => b.comments - a.comments)
+      }
+    },
+    storeDataToLocalStorage() {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify({
+        sortSelectedOption: this.sortSelectedOption,
+        feedbackItems: this.feedbackItems,
+      }))
+    }
+  },
+  watch: {
+    sortSelectedOption() {
+      this.sortFeedbackItems()
+      this.storeDataToLocalStorage()
+    },
+    feedbackItems: {
+      handler: function () {
+        this.storeDataToLocalStorage()
+      },
+      deep: true,
+    }
   },
 }
 </script>
 
 <style lang="sass">
 #app 
-  font-family: Avenir, Helvetica, Arial, sans-serif
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif
   -webkit-font-smoothing: antialiased
   -moz-osx-font-smoothing: grayscale
+  display: flex
+  justify-content: center
+  margin-top: 150px
+  @media (max-width: 1200px)
+    flex-direction: column
+    padding: 10px
 
-$button-background: linear-gradient(0deg, #e3e3e3, #fbfbfb)
-$button-border-color: #bdbdbd
-$button-text-color: #868686
-
-$input-border-color: #dbdbdb
-
-.custom-button
-  outline: 0
-  border: 0
-  background: $button-background
-  border: 1px solid $button-border-color
-  border-radius: 5px
-  padding: 6px 12px
-  font-weight: bold
-  color: $button-text-color
-  font-size: 12px
-  cursor: pointer
-
-.custom-input
-  border-radius: 5px
-  border: 1px solid $input-border-color
-  padding: 5px
-  &:focus
-      outline: none
+#app, body
+  background: #f9fafd
 </style>
