@@ -9,4 +9,4 @@ npm start
 
 ## Technologies used
 
-Vue.js, Express.js, MongoDB
+Vue.js
