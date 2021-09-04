@@ -1,4 +1,4 @@
-# task-z
+# Test task
 
 ## Project setup
 ```
